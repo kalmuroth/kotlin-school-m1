@@ -40,4 +40,14 @@ class MovieViewModel : ViewModel() {
             }
         }
     }
+
+    suspend fun searchMoviesByTitle(title: String) {
+        val apiService = APIService.getInstance()
+        try {
+            _movieList.clear()
+            _movieList.addAll(apiService.searchMoviesByTitle(query = title).results)
+        } catch (e: Exception) {
+            Log.e("MovieViewModel", "Error: ${e.message}")
+        }
+    }
 }

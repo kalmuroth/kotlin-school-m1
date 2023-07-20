@@ -25,17 +25,24 @@ data class MovieResponse(
 const val BASE_URL = "https://api.themoviedb.org/3/"
 
 interface APIService {
-    @GET("movie/popular")
-    suspend fun getMovies(
-        @Query("api_key") apiKey: String = "8462a368268d6817ff5947a2f3027998",
-        @Query("page") page: Int = 1
-    ): MovieResponse // Change the return type to MovieResponse
 
     @GET("movie/{movie_id}")
     suspend fun getMovieDetail(
         @Path("movie_id") movieId: Long,
         @Query("api_key") apiKey: String = "8462a368268d6817ff5947a2f3027998"
     ): Movie
+
+    @GET("movie/popular")
+    suspend fun getMovies(
+        @Query("api_key") apiKey: String = "8462a368268d6817ff5947a2f3027998",
+        @Query("page") page: Int = 1
+    ): MovieResponse
+
+    @GET("search/movie")
+    suspend fun searchMoviesByTitle(
+        @Query("api_key") apiKey: String = "8462a368268d6817ff5947a2f3027998",
+        @Query("query") query: String
+    ): MovieResponse
 
     companion object {
         var apiService: APIService? = null
