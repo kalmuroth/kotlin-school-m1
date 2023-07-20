@@ -27,4 +27,17 @@ class MovieViewModel : ViewModel() {
             }
         }
     }
+
+    private val _movieDetail = mutableStateOf<Movie?>(null)
+    val movieDetail: Movie? get() = _movieDetail.value
+    fun getMovieDetailById(movieId: Long) {
+        viewModelScope.launch {
+            val apiService = APIService.getInstance()
+            try {
+                _movieDetail.value = apiService.getMovieDetail(movieId)
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
+            }
+        }
+    }
 }
