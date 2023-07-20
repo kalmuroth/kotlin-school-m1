@@ -22,6 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.IconButton
@@ -40,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -204,20 +207,29 @@ fun BigMovieImage(posterPath: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(movieId: Long, navController: NavController) {
-    val vm = remember { MovieViewModel() }
+    val vm = viewModel<MovieViewModel>()
 
     LaunchedEffect(movieId) {
         vm.getMovieDetailById(movieId)
     }
 
     val movieDetail = vm.movieDetail
+    var isLiked by remember { mutableStateOf(false) }
 
     if (movieDetail != null) {
+        isLiked = LikedMovies.likedMovieIds.contains(movieId)
+
         Scaffold(
             topBar = {
-                DetailAppBar(title = movieDetail.title) {
-                    navController.popBackStack()
-                }
+                DetailAppBar(
+                    title = movieDetail.title,
+                    onBackClick = { navController.popBackStack() },
+                    onLikeClick = {
+                        vm.toggleLike(movieId)
+                        isLiked = !isLiked
+                    },
+                    isLiked = isLiked
+                )
             },
             content = {
                 Column(
@@ -229,7 +241,7 @@ fun MovieDetailScreen(movieId: Long, navController: NavController) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    StarRating(rating = movieDetail.rating) // Display the star rating
+                    StarRating(rating = movieDetail.rating)
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -257,7 +269,9 @@ fun MovieDetailScreen(movieId: Long, navController: NavController) {
 @Composable
 fun DetailAppBar(
     title: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onLikeClick: () -> Unit, // New callback for the like button
+    isLiked: Boolean // New state to determine the like button's appearance
 ) {
     Row(
         modifier = Modifier
@@ -269,6 +283,7 @@ fun DetailAppBar(
         IconButton(onClick = onBackClick) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
         }
+
         Text(
             text = title,
             style = TextStyle(
@@ -276,8 +291,21 @@ fun DetailAppBar(
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             ),
-            modifier = Modifier.padding(start = 16.dp)
+            modifier = Modifier
+                .weight(1f) // Allow the title to take the available space
+                .padding(start = 16.dp)
         )
+
+        IconButton(
+            onClick = onLikeClick,
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = if (isLiked) "Liked" else "Not Liked",
+                tint = if (isLiked) Color.Green else Color.White
+            )
+        }
     }
 }
 @ExperimentalMaterial3Api
@@ -388,7 +416,7 @@ fun StarRating(rating: Float) {
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = "Star",
-                tint = Color.Yellow,
+                tint = Color.Green,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -398,7 +426,7 @@ fun StarRating(rating: Float) {
             Icon(
                 imageVector = Icons.Default.Star, // Use your custom half star icon
                 contentDescription = "Half Star",
-                tint = Color.Red,
+                tint = Color.Blue,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -409,7 +437,7 @@ fun StarRating(rating: Float) {
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = "Empty Star",
-                tint = Color.Black,
+                tint = Color.White,
                 modifier = Modifier.size(24.dp)
             )
         }

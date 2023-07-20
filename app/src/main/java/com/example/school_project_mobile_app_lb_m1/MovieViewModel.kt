@@ -9,6 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
+
+object LikedMovies {
+    val likedMovieIds = mutableSetOf<Long>()
+}
+
 class MovieViewModel : ViewModel() {
     private val _movieList = mutableStateListOf<Movie>()
     var errorMessage: String by mutableStateOf("")
@@ -48,6 +53,14 @@ class MovieViewModel : ViewModel() {
             _movieList.addAll(apiService.searchMoviesByTitle(query = title).results)
         } catch (e: Exception) {
             Log.e("MovieViewModel", "Error: ${e.message}")
+        }
+    }
+
+    fun toggleLike(movieId: Long) {
+        if (LikedMovies.likedMovieIds.contains(movieId)) {
+            LikedMovies.likedMovieIds.remove(movieId)
+        } else {
+            LikedMovies.likedMovieIds.add(movieId)
         }
     }
 }
