@@ -3,6 +3,7 @@ package com.example.school_project_mobile_app_lb_m1
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.material3.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -18,9 +19,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +41,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import com.example.school_project_mobile_app_lb_m1.ui.theme.Schoolprojectmobileapplbm1Theme
 
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +51,7 @@ class MainActivity : ComponentActivity() {
         val vm = MovieViewModel()
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            Schoolprojectmobileapplbm1Theme {
                 val navController = rememberNavController()
                 NavHost(navController, startDestination = "moviesList") {
                     composable("moviesList") { MovieView(vm, navController) }
@@ -54,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     ) { backStackEntry ->
                         val arguments = requireNotNull(backStackEntry.arguments)
                         val movieId = arguments.getLong("movieId")
-                        MovieDetailScreen(movieId)
+                        MovieDetailScreen(movieId, navController)
                     }
                 }
             }
@@ -185,8 +192,9 @@ fun BigMovieImage(posterPath: String) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieDetailScreen(movieId: Long) {
+fun MovieDetailScreen(movieId: Long, navController: NavController) {
     val vm = remember { MovieViewModel() } // Use remember to retain the ViewModel
 
     // Fetch the movie details using the movieId only once
@@ -199,41 +207,76 @@ fun MovieDetailScreen(movieId: Long) {
 
     // Display the movie details using the 'movieDetail' data
     if (movieDetail != null) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            // Display the big image at the top
-            BigMovieImage(posterPath = movieDetail.posterPath)
+        Scaffold(
+            topBar = {
+                CustomAppBar(title = movieDetail.title) {
+                    navController.popBackStack()
+                }
+            },
+            content = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    // Display the big image at the top
+                    BigMovieImage(posterPath = movieDetail.posterPath)
 
-            // Movie info below the image
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = movieDetail.title,
-                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+                    // Movie info below the image
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = movieDetail.title,
+                        style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = movieDetail.releaseDate,
-                style = TextStyle(fontSize = 16.sp, color = Color.Gray),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = movieDetail.releaseDate,
+                        style = TextStyle(fontSize = 16.sp, color = Color.Gray),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = movieDetail.overview,
-                style = TextStyle(fontSize = 16.sp),
-                maxLines = 10,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = movieDetail.overview,
+                        style = TextStyle(fontSize = 16.sp),
+                        maxLines = 10,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        )
     } else {
-        // Show a loading state or handle error here
-        Text(text = "Loading...")
+        Text(text = "Erreur d'appel API...")
+    }
+}
+
+@Composable
+fun CustomAppBar(
+    title: String,
+    onBackClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .background(Color.Gray),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBackClick) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+        }
+        Text(
+            text = title,
+            style = TextStyle(
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            ),
+            modifier = Modifier.padding(start = 16.dp)
+        )
     }
 }
