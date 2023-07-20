@@ -22,8 +22,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.IconButton
@@ -72,6 +74,7 @@ class MainActivity : ComponentActivity() {
                         val movieId = arguments.getLong("movieId")
                         MovieDetailScreen(movieId, navController)
                     }
+                    composable("library") { LibraryView(vm, navController) }
                 }
             }
         }
@@ -113,10 +116,45 @@ fun MovieView(vm: MovieViewModel, navController: NavController) {
                     MovieListItem(movie, navController)
                 }
             }
+        },
+        bottomBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(Color.Gray)
+            ) {
+                IconButton(
+                    onClick = { navController.navigate("moviesList") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = Color.White
+                        )
+                        Text(text = "Home", color = Color.White)
+                    }
+                }
+
+                IconButton(
+                    onClick = { navController.navigate("library") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Build,
+                            contentDescription = "Library",
+                            tint = Color.White
+                        )
+                        Text(text = "Library", color = Color.White)
+                    }
+                }
+            }
         }
     )
 }
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -443,5 +481,6 @@ fun StarRating(rating: Float) {
         }
     }
 }
+
 
 

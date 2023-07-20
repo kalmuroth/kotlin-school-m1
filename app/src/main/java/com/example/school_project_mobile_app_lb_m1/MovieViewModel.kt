@@ -63,4 +63,9 @@ class MovieViewModel : ViewModel() {
             LikedMovies.likedMovieIds.add(movieId)
         }
     }
+
+    fun getLikedMovies(): List<Movie> {
+        val likedMovies = LikedMovies.likedMovieIds
+        return movieList.filter { movie -> movie.id in likedMovies }
+    }
 }
